@@ -13,7 +13,7 @@ import comjava.service.Student;
 import comjava.service.StudentService;
 
 @Configuration
-public class AppProxyConfig {
+public class StudentConfig {
 
 	@Autowired
 	private StudentService studentService;
@@ -21,7 +21,12 @@ public class AppProxyConfig {
 	@Bean
 	public Function<APIGatewayProxyRequestEvent, List<Student>> getListProxy() {
 
-		return (proxyRequestEvent) -> studentService.getList();
+		return (proxyRequestEvent) -> {
+			System.out.println(proxyRequestEvent.getHeaders());
+			System.out.println(proxyRequestEvent.getQueryStringParameters());
+			System.out.println(proxyRequestEvent.getPathParameters());
+			return  studentService.getList();
+		};
 	}
 
 	@Bean
@@ -32,18 +37,6 @@ public class AppProxyConfig {
 			Student student = new Student(1, body);
 
 			studentService.addStudent(student);
-			return studentService.getList();
-		};
-	}
-
-	@Bean
-	public Function<APIGatewayProxyRequestEvent, List<Student>> deleteStudentProxy() {
-
-		return (mapValues) -> {
-
-			long id = Long.valueOf(String.valueOf(mapValues.getPathParameters().get("id")));
-			studentService.deleteStudent(id);
-
 			return studentService.getList();
 		};
 	}
